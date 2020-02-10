@@ -6,6 +6,7 @@ namespace Dev.Modules {
         private _container: Core.Modules.Container;
         private _currentCharacterState:Enum.CharacterState;
         private _tween:any;
+        private _destroyEmitter:PIXI.particles.Emitter;
 
         public constructor(container:Core.Modules.Container) {
             super();
@@ -14,16 +15,23 @@ namespace Dev.Modules {
             this.initProperties();
         }
 
-        private playAnimation(state:Enum.CharacterState){
+        public playAnimation(state:Enum.CharacterState){
+            let aI = Config.AssetConfig;
             switch(state){
                 case Enum.CharacterState.Idle:
                     this._ship.playAnimation(Enum.AnimNames.EnemyIdle);
                     break;
                 case Enum.CharacterState.Destroyed:
+                    this._destroyEmitter = new PIXI.particles.Emitter(this._ship, aI.ParticleSpark.frame, aI.Expo); 
+                    let elapsed = Date.now();      //current time
+                    PIXI.Ticker.shared.add((deltatime) => {
+                        this._destroyEmitter.update((Date.now() - elapsed) * 0.0008);
+                        elapsed = Date.now();
+                    }, this);
                     this._ship.playAnimation(Enum.AnimNames.EnemyDestroyed);
                     break;
                 case Enum.CharacterState.Hit:
-                    this._ship.playAnimation(Enum.AnimNames.EnemyDestroyed);
+                    this._ship.playAnimation(Enum.AnimNames.EnemyHit);
                     break;
             }
         }
@@ -48,7 +56,6 @@ namespace Dev.Modules {
         public dispose(){
             if(this._tween)
             this._tween.kill();
-            delete this._ship;
         }
 
         private randomY(){
@@ -59,6 +66,10 @@ namespace Dev.Modules {
 
         public get ship(){
             return this._ship;
+        }
+
+        public get destroyEmitter(){
+            return this._destroyEmitter;
         }
     }
 }

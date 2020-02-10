@@ -377,6 +377,11 @@ module Dev.Config {
                 name : "MainBackgroundLayer5"
             }
         ]
+        
+        static ParticleSpark : Core.Interface.ISpriteConfig = {
+            frame : Texture.ParticleSpark,
+            name : "ParticleSpark"
+        }
 
         //
         // ────────────────────────────────────────────────────────── Sprite Config ─────
@@ -541,27 +546,27 @@ module Dev.Config {
 
          //
         // ─── Particles Config ────────────────────────────────────────────────────────────
-        //
+        // 
 
           /**fire spark emitter */
-          static FireSparkEmitter = {
+          static Expo = {
             "alpha": {
-                "start": .5,
-                "end": 0.5
+                "start": 0.56,
+                "end": 0.36
             },
             "scale": {
-                "start": 0.03,
-                "end": 0.22,
-                "minimumScaleMultiplier": 0.32
+                "start": 1,
+                "end": 0.3,
+                "minimumScaleMultiplier": 1
             },
             "color": {
-                "start": "#ffffff",
-                "end": "#ffffff"
+                "start": "#d11313",
+                "end": "#474747"
             },
             "speed": {
-                "start": 85,
-                "end": 66,
-                "minimumSpeedMultiplier": 0.94
+                "start": 200,
+                "end": 200,
+                "minimumSpeedMultiplier": 1
             },
             "acceleration": {
                 "x": 0,
@@ -570,7 +575,7 @@ module Dev.Config {
             "maxSpeed": 0,
             "startRotation": {
                 "min": 0,
-                "max": 360
+                "max": 0
             },
             "noRotation": false,
             "rotationSpeed": {
@@ -578,24 +583,22 @@ module Dev.Config {
                 "max": 0
             },
             "lifetime": {
-                "min": 0.13,
-                "max": 0.8
+                "min": 2,
+                "max": 2
             },
             "blendMode": "normal",
-            "frequency": 0.006,
-            "emitterLifetime": -0.66,
-            "maxParticles": 7,
+            "frequency": 0.1,
+            "emitterLifetime": 0.31,
+            "maxParticles": 50,
             "pos": {
                 "x": 0,
                 "y": 0
             },
             "addAtBack": false,
-            "spawnType": "circle",
-            "spawnCircle": {
-                "x": 5,
-                "y": 0,
-                "r": 0
-            }
+            "spawnType": "burst",
+            "particlesPerWave": 10,
+            "particleSpacing": 0,
+            "angleStart": 0
         }
          //
         // ────────────────────────────────────────────────────────── Particles Config ─────

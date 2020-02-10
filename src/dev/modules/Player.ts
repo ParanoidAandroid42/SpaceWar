@@ -26,6 +26,8 @@ namespace Dev.Modules {
                 case Enum.Actions.BulletDestroyed:
                     delete this.bullet[data.bullet.name];
                     this.emit(Enum.Listeners.OnPlayerAction,Enum.Actions.BulletDestroyed,data);
+                    var index: number = this._bullet.indexOf(data, 0);
+                    delete this._bullet[index];
                     break;
             }
         }

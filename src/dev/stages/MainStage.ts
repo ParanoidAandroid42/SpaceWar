@@ -139,7 +139,7 @@ namespace Dev.Stages {
                     aBox.y < bBox.y + bBox.height;
                     
                 if(collision) {
-                    enemy.ship.playAnimation(Enum.AnimNames.EnemyDestroyed);
+                    enemy.playAnimation(Enum.CharacterState.Destroyed);
                     Core.Managers.TickerManager.instance.removeTicker("Collision"+enemy.ship.name);
                     for(let i = 0; i<this._enemy.length; i++){
                         Core.Managers.TickerManager.instance.removeTicker("CollisionBullet"+bullet.bullet.name+i.toString());
@@ -147,8 +147,15 @@ namespace Dev.Stages {
                     bullet.dispose();
                     bullet.bullet.destroy();
                     enemy.dispose();
-                    if(enemy.ship)
-                    enemy.ship.destroy();
+                    
+                    Core.Managers.TickerManager.instance.addTimeout("DestroyedEnemy",1,()=>{
+                        if(enemy.destroyEmitter)
+                        enemy.destroyEmitter.destroy();
+                        if(enemy.ship)
+                        enemy.ship.destroy({children:true});
+                        var index: number = this._enemy.indexOf(enemy, 0);
+                        delete this._enemy[index];
+                    },false);
                 }
             }
         }

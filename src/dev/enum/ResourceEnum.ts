@@ -66,6 +66,7 @@ namespace Dev.Enum {
         MainBackgroundLayer3 = "assets/gfx/Background/Main/Layer3.png",
         MainBackgroundLayer4 = "assets/gfx/Background/Main/Layer4.png",
         MainBackgroundLayer5 = "assets/gfx/Background/Main/Layer5.png",
+        ParticleSpark = "assets/gfx/Enemy/particle.png",
         PlayerIcon1 = "assets/gfx/PlayerIcon/Pilot01.png",
         PlayerIcon2 = "assets/gfx/PlayerIcon/Pilot02.png",
         PlayerIcon3 = "assets/gfx/PlayerIcon/Pilot03.png",

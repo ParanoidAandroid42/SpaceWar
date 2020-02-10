@@ -1878,6 +1878,7 @@ var Dev;
             Texture["MainBackgroundLayer3"] = "assets/gfx/Background/Main/Layer3.png";
             Texture["MainBackgroundLayer4"] = "assets/gfx/Background/Main/Layer4.png";
             Texture["MainBackgroundLayer5"] = "assets/gfx/Background/Main/Layer5.png";
+            Texture["ParticleSpark"] = "assets/gfx/Enemy/particle.png";
             Texture["PlayerIcon1"] = "assets/gfx/PlayerIcon/Pilot01.png";
             Texture["PlayerIcon2"] = "assets/gfx/PlayerIcon/Pilot02.png";
             Texture["PlayerIcon3"] = "assets/gfx/PlayerIcon/Pilot03.png";
@@ -2169,6 +2170,10 @@ var Dev;
                     name: "MainBackgroundLayer5"
                 }
             ];
+            AssetConfig.ParticleSpark = {
+                frame: Texture.ParticleSpark,
+                name: "ParticleSpark"
+            };
             AssetConfig.LoadingCircleBg = {
                 shape: Shape.RoundRect,
                 name: "LoadingCircle",
@@ -2299,24 +2304,24 @@ var Dev;
                     name: "EnemyShip"
                 }
             ];
-            AssetConfig.FireSparkEmitter = {
+            AssetConfig.Expo = {
                 "alpha": {
-                    "start": .5,
-                    "end": 0.5
+                    "start": 0.56,
+                    "end": 0.36
                 },
                 "scale": {
-                    "start": 0.03,
-                    "end": 0.22,
-                    "minimumScaleMultiplier": 0.32
+                    "start": 1,
+                    "end": 0.3,
+                    "minimumScaleMultiplier": 1
                 },
                 "color": {
-                    "start": "#ffffff",
-                    "end": "#ffffff"
+                    "start": "#d11313",
+                    "end": "#474747"
                 },
                 "speed": {
-                    "start": 85,
-                    "end": 66,
-                    "minimumSpeedMultiplier": 0.94
+                    "start": 200,
+                    "end": 200,
+                    "minimumSpeedMultiplier": 1
                 },
                 "acceleration": {
                     "x": 0,
@@ -2325,7 +2330,7 @@ var Dev;
                 "maxSpeed": 0,
                 "startRotation": {
                     "min": 0,
-                    "max": 360
+                    "max": 0
                 },
                 "noRotation": false,
                 "rotationSpeed": {
@@ -2333,24 +2338,22 @@ var Dev;
                     "max": 0
                 },
                 "lifetime": {
-                    "min": 0.13,
-                    "max": 0.8
+                    "min": 2,
+                    "max": 2
                 },
                 "blendMode": "normal",
-                "frequency": 0.006,
-                "emitterLifetime": -0.66,
-                "maxParticles": 7,
+                "frequency": 0.1,
+                "emitterLifetime": 0.31,
+                "maxParticles": 50,
                 "pos": {
                     "x": 0,
                     "y": 0
                 },
                 "addAtBack": false,
-                "spawnType": "circle",
-                "spawnCircle": {
-                    "x": 5,
-                    "y": 0,
-                    "r": 0
-                }
+                "spawnType": "burst",
+                "particlesPerWave": 10,
+                "particleSpacing": 0,
+                "angleStart": 0
             };
             return AssetConfig;
         }());
@@ -2736,15 +2739,23 @@ var Dev;
                 return _this;
             }
             Enemy.prototype.playAnimation = function (state) {
+                var _this = this;
+                var aI = Dev.Config.AssetConfig;
                 switch (state) {
                     case Dev.Enum.CharacterState.Idle:
                         this._ship.playAnimation(Dev.Enum.AnimNames.EnemyIdle);
                         break;
                     case Dev.Enum.CharacterState.Destroyed:
+                        this._destroyEmitter = new PIXI.particles.Emitter(this._ship, aI.ParticleSpark.frame, aI.Expo);
+                        var elapsed_1 = Date.now();
+                        PIXI.Ticker.shared.add(function (deltatime) {
+                            _this._destroyEmitter.update((Date.now() - elapsed_1) * 0.0008);
+                            elapsed_1 = Date.now();
+                        }, this);
                         this._ship.playAnimation(Dev.Enum.AnimNames.EnemyDestroyed);
                         break;
                     case Dev.Enum.CharacterState.Hit:
-                        this._ship.playAnimation(Dev.Enum.AnimNames.EnemyDestroyed);
+                        this._ship.playAnimation(Dev.Enum.AnimNames.EnemyHit);
                         break;
                 }
             };
@@ -2768,7 +2779,6 @@ var Dev;
             Enemy.prototype.dispose = function () {
                 if (this._tween)
                     this._tween.kill();
-                delete this._ship;
             };
             Enemy.prototype.randomY = function () {
                 var r = Dev.Config.GameConfig.DisplayConfig;
@@ -2779,6 +2789,13 @@ var Dev;
             Object.defineProperty(Enemy.prototype, "ship", {
                 get: function () {
                     return this._ship;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Enemy.prototype, "destroyEmitter", {
+                get: function () {
+                    return this._destroyEmitter;
                 },
                 enumerable: true,
                 configurable: true
@@ -2812,6 +2829,8 @@ var Dev;
                     case Dev.Enum.Actions.BulletDestroyed:
                         delete this.bullet[data.bullet.name];
                         this.emit(Dev.Enum.Listeners.OnPlayerAction, Dev.Enum.Actions.BulletDestroyed, data);
+                        var index = this._bullet.indexOf(data, 0);
+                        delete this._bullet[index];
                         break;
                 }
             };
@@ -3009,6 +3028,7 @@ var Dev;
                 }
             };
             MainStage.prototype.checkBulletCollision = function (bullet, enemy) {
+                var _this = this;
                 if (enemy.ship != null && enemy.ship != undefined && bullet.bullet != null && bullet.bullet != undefined) {
                     var collision = false;
                     var aBox = bullet.bullet.getBounds();
@@ -3018,7 +3038,7 @@ var Dev;
                         aBox.x + aBox.height > bBox.y &&
                         aBox.y < bBox.y + bBox.height;
                     if (collision) {
-                        enemy.ship.playAnimation(Dev.Enum.AnimNames.EnemyDestroyed);
+                        enemy.playAnimation(Dev.Enum.CharacterState.Destroyed);
                         Core.Managers.TickerManager.instance.removeTicker("Collision" + enemy.ship.name);
                         for (var i = 0; i < this._enemy.length; i++) {
                             Core.Managers.TickerManager.instance.removeTicker("CollisionBullet" + bullet.bullet.name + i.toString());
@@ -3026,8 +3046,14 @@ var Dev;
                         bullet.dispose();
                         bullet.bullet.destroy();
                         enemy.dispose();
-                        if (enemy.ship)
-                            enemy.ship.destroy();
+                        Core.Managers.TickerManager.instance.addTimeout("DestroyedEnemy", 1, function () {
+                            if (enemy.destroyEmitter)
+                                enemy.destroyEmitter.destroy();
+                            if (enemy.ship)
+                                enemy.ship.destroy({ children: true });
+                            var index = _this._enemy.indexOf(enemy, 0);
+                            delete _this._enemy[index];
+                        }, false);
                     }
                 }
             };
