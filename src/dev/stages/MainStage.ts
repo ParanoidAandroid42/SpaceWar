@@ -212,8 +212,10 @@ namespace Dev.Stages {
                 this.game.off(dataName);
             } 
             this._player.dispose();
-            for(let i = 0 ; i<this._enemy.length; i++)
+            for(let i = 0 ; i<this._enemy.length; i++){
+                if(this._enemy[i])
                 this._enemy[i].dispose();
+            }
             for(let i = 0 ; i<this._player.bullet.length; i++)
                 this._player.bullet[i].dispose();
             this._container.destroy({children:true})
