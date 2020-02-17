@@ -1,6 +1,6 @@
 # SpaceWar
 
-#  Task solution for Play'n GO Company
+#  Simple Shooting game
 
 
 #  Built With TypeScript PixiJS 
